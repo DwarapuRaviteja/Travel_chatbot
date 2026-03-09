@@ -8,16 +8,21 @@ body {
     align-items: center;
 }
 
-.chat-container {
-    width: 450px;
-    height: 620px;
-    background: #ffffff;
-    border-radius: 18px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+.chat-container{
+    width:700px;
+    max-width:95%;
+    height:600px;
+    margin:auto;
+    background:white;
+    border-radius:15px;
+    display:flex;
+    flex-direction:column;
 }
 
+.message{
+white-space: pre-line;
+line-height:1.7;
+}
 h1 {
     margin: 0;
     padding: 18px;
@@ -33,16 +38,22 @@ h1 {
     overflow-y: auto;
 }
 
-.user-msg {
-    text-align: right;
-    margin: 12px 0;
-    color: #1d2671;
+.user-msg{
+background:#4a90e2;
+color:white;
+padding:10px;
+border-radius:10px;
+margin:8px;
+max-width:75%;
+margin-left:auto;
 }
 
-.bot-msg {
-    text-align: left;
-    margin: 12px 0;
-    color: #444;
+.bot-msg{
+background:#f1f1f1;
+padding:10px;
+border-radius:10px;
+margin:8px;
+max-width:75%;
 }
 
 .input-area {
