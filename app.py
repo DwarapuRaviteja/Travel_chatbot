@@ -10,47 +10,105 @@ model = genai.GenerativeModel("gemini-2.5-flash")
 
 chat_history = []
 
+SYSTEM_PROMPT = """
+You are TravelGPT AI, a professional travel assistant.
+
+Capabilities:
+- Travel planning
+- Tourist attractions
+- Budget estimation
+- Route guidance
+- Hotel recommendations
+- Transport suggestions
+- Itinerary generation
+- Travel safety tips
+
+Response Rules:
+1. Use headings when appropriate.
+2. Use bullet points.
+3. Keep answers clear and structured.
+4. Mention estimated costs when possible.
+5. Mention travel time and distance when relevant.
+6. Avoid long paragraphs.
+7. Be friendly and professional.
+8. Format responses nicely for a chat application.
+
+If information is unavailable, clearly say it is an estimate.
+"""
+
 @app.route("/")
-def index():
+def home():
     return render_template("index.html")
+
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_message = request.json.get("message")
 
+    try:
+        data = request.get_json()
+        user_message = data.get("message", "").strip()
+
+        if not user_message:
+            return jsonify({
+                "success": False,
+                "reply": "Please enter a message."
+            })
+
+        global chat_history
+
+        chat_history.append({
+            "role": "user",
+            "message": user_message
+        })
+
+        conversation = ""
+
+        for item in chat_history[-10:]:
+            conversation += f"{item['role']}: {item['message']}\n"
+
+        prompt = f"""
+{SYSTEM_PROMPT}
+
+Conversation History:
+{conversation}
+
+User Question:
+{user_message}
+
+Provide the best travel-related response.
+"""
+
+        response = model.generate_content(prompt)
+
+        bot_reply = response.text
+
+        chat_history.append({
+            "role": "assistant",
+            "message": bot_reply
+        })
+
+        return jsonify({
+            "success": True,
+            "reply": bot_reply
+        })
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "reply": str(e)
+        })
+
+
+@app.route("/new-chat", methods=["POST"])
+def new_chat():
     global chat_history
+    chat_history = []
 
-    chat_history.append(f"User: {user_message}")
+    return jsonify({
+        "success": True,
+        "message": "New chat started."
+    })
 
-    conversation = "\n".join(chat_history)
-
-    prompt = f"""
-    You are a travel information assistant.
-
-    Follow these rules strictly:
-
-    1. Give answers in short points.
-    2. Each point must be on a new line.
-    3. Avoid long paragraphs.
-    4. Use bullet points when possible.
-    5. Provide clear travel information like:
-    - Distance
-    - Travel time
-    - Cost
-    - Best options
-
-    Conversation History:
-    {conversation}
-
-    Now answer the latest user query clearly.
-    """
-
-    response = model.generate_content(prompt)
-    bot_reply = response.text
-    bot_reply = bot_reply.replace(". ", ".\n")
-    chat_history.append(f"Bot: {bot_reply}")
-
-    return jsonify({"reply": bot_reply})
 
 if __name__ == "__main__":
     app.run(debug=True)
