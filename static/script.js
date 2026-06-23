@@ -48,7 +48,7 @@ async function sendMessage() {
     try {
 
         const response =
-            await fetch("https://travel-chatbot-2-ckvo.onrender.com/chat", {
+            await fetch("/chat", {
 
                 method: "POST",
 
